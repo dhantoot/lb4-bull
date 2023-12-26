@@ -20,7 +20,7 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
     return this.job.progress()
   }
 
-  async saveToDB () {
+  async saveToDb () {
     console.log('saving data to db...')
     return new Promise(resolve => setTimeout(resolve, 5000)); 
   }
@@ -36,11 +36,12 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
       attemptsMade
     })
     
-    // const resp = await this.saveToDB()
-    // if (resp) {
-    //   await job.moveToCompleted()
-    //   return Promise.resolve()
-    // }
+    const resp = await this.saveToDb()
+    console.log('resp ', resp)
+    if (resp) {
+      await job.moveToCompleted()
+      return Promise.resolve()
+    }
 
     // const ms = Math.floor(Math.random() * (30000 - 10000 + 1000) + 1000)
     // const sec = ms/1000
@@ -105,7 +106,7 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
     for (let item of data) {
       this.queue.add(
         item,
-        { removeOnComplete: false, removeOnFail: false, lifo: true }
+        { removeOnComplete: true, removeOnFail: false, lifo: true, repeat : {cron: '* * * * *'} }
       );
     }
   }

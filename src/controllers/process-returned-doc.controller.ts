@@ -5,6 +5,12 @@ import {
   get,
   response,
   ResponseObject,
+  param,
+  patch,
+  post,
+  put,
+  requestBody,
+  del
 } from '@loopback/rest';
 import ProcessReturnedDocProvider from '../services/process-returned-doc.service'
 import Bull, { Queue, Job } from "bull";
@@ -47,12 +53,16 @@ export class ProcessReturnedDocController {
 
   // Map to `GET /processReturnedDoc`
   @response(200, SIMPLE_RESPONSE) 
-  @get('/status')
-  async status(): Promise<any> {
+  @get('/returned_status')
+  async status(@param.path.string('tag') id: string): Promise<any> {
     // console.log(await this.queue.getRepeatableJobs())
     console.log(await this.queue.getFailedCount())
     console.log(await this.queue.getCompletedCount())
+    console.log('--------')
     console.log(await this.queue.count())
+    console.log('--------')
+    console.log(await this.queue.getFailed())
+    console.log(await this.queue.getCompleted())
     return {
       greeting: 'Porcessing Returned Documents',
       date: new Date(),

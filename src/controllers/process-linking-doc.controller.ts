@@ -59,7 +59,7 @@ export class ProcessLinkingDocController {
   // }
 
   @response(200, SIMPLE_RESPONSE)
-  @get('/status')
+  @get('/linking_status')
   async status(): Promise<any> {
     // console.log(await this.queue.getRepeatableJobs())
     console.log(await this.queue.getFailedCount())

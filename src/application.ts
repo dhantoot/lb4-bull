@@ -46,6 +46,6 @@ export class HofsteeApplication extends BootMixin(
 
   startJobProcess () {
     new ProcessReturnedDocProvider().initialize()
-    new ProcessLinkingDocProvider().initialize()
+    // new ProcessLinkingDocProvider().initialize()
   }
 }

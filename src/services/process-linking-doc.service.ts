@@ -26,7 +26,7 @@ export default class ProcessLinkingDocProvider implements Provider<Queue> {
     return this.job.progress()
   }
 
-  async saveToDB () {
+  async saveToDb () {
     console.log('saving data to db...')
     return new Promise(resolve => setTimeout(resolve, 5000)); 
   }
@@ -42,7 +42,7 @@ export default class ProcessLinkingDocProvider implements Provider<Queue> {
       attemptsMade
     })
     
-    // const resp = await this.saveToDB()
+    // const resp = await this.saveToDb()
     // if (resp) {
     //   await job.moveToCompleted()
     //   return Promise.resolve()
