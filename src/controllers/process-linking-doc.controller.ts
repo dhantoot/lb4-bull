@@ -59,12 +59,14 @@ export class ProcessLinkingDocController {
   // }
 
   @response(200, SIMPLE_RESPONSE)
-  @get('/pauseLinkingDocProcess')
-  async pauseLinkingDocProcess(): Promise<any> {
-    console.log('Pause Linking document processing..')
-    await this.queue.pause();
+  @get('/status')
+  async status(): Promise<any> {
+    // console.log(await this.queue.getRepeatableJobs())
+    console.log(await this.queue.getFailedCount())
+    console.log(await this.queue.getCompletedCount())
+    console.log(await this.queue.count())
     return {
-      greeting: 'Paused',
+      greeting: 'Porcessing Returned Documents',
       date: new Date(),
       url: this.req.url,
       headers: Object.assign({}, this.req.headers),

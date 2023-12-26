@@ -46,17 +46,20 @@ export class ProcessReturnedDocController {
   ) {}
 
   // Map to `GET /processReturnedDoc`
-  // @response(200, SIMPLE_RESPONSE) 
-  // @get('/processReturnedDoc')
-  // async processReturnedDoc(): Promise<any> {
-  //   console.log('Aloha')
-  //   return {
-  //     greeting: 'Porcessing Returned Documents',
-  //     date: new Date(),
-  //     url: this.req.url,
-  //     headers: Object.assign({}, this.req.headers),
-  //   };
-  // }
+  @response(200, SIMPLE_RESPONSE) 
+  @get('/status')
+  async status(): Promise<any> {
+    // console.log(await this.queue.getRepeatableJobs())
+    console.log(await this.queue.getFailedCount())
+    console.log(await this.queue.getCompletedCount())
+    console.log(await this.queue.count())
+    return {
+      greeting: 'Porcessing Returned Documents',
+      date: new Date(),
+      url: this.req.url,
+      headers: Object.assign({}, this.req.headers),
+    };
+  }
 
   @response(200, SIMPLE_RESPONSE)
   @get('/pauseReturnedDocProcess')
