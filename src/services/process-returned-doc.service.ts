@@ -2,6 +2,8 @@ import {injectable, /* inject, */ BindingScope, Provider, service} from '@loopba
 import Bull, { Queue, Job } from "bull";
 import { AnyARecord } from 'dns';
 import { resolve } from 'path';
+import Redis from 'ioredis';
+const redis = new Redis(6379, "192.168.1.1")
 
 @injectable({scope: BindingScope.SINGLETON})
 export default class ProcessReturnedDocProvider implements Provider<Queue> {
@@ -44,7 +46,7 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
         failedReason
       } = job
       
-      const ms = Math.floor(Math.random() * (10000 - 1000 + 100) + 100)
+      const ms = Math.floor(Math.random() * (60000 - 1000 + 100) + 100)
       const sec = ms/1000
 
       console.log('returnedDocProcessor: processing this data', {
@@ -146,11 +148,14 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
   async initialize() {
     console.log('initialize: initializing bull instance..')
     try {
-      this.queue = new Bull("returnedDocProcessor", {
-        redis: { port: 6379, host: "127.0.0.1" }
-      });
-      console.log('initialize: this.queue', this.queue.name)
-      this.start()
+      //check redis if online, preset to false
+      if(false) {
+        throw new Error('Redis offline..')
+      } else {
+        this.queue = new Bull("returnedDocProcessor");
+        console.log('initialize: this.queue', this.queue.name)
+        this.start()
+      }
     } catch (e) {
       console.log('initialize: e', e)
       throw new Error(e)
