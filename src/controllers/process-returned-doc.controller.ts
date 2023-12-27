@@ -54,7 +54,7 @@ export class ProcessReturnedDocController {
   // Map to `GET /processReturnedDoc`
   @response(200, SIMPLE_RESPONSE) 
   @get('/returned_status')
-  async status(@param.path.string('tag') id: string): Promise<any> {
+  async status(): Promise<any> {
     // console.log(await this.queue.getRepeatableJobs())
     console.log(await this.queue.getFailedCount())
     console.log(await this.queue.getCompletedCount())
