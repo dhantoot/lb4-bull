@@ -1,0 +1,28 @@
+{
+    "schedule": [{
+        "name": "linking",
+        "cronTime": "*/10 * * * * *"
+    }, {
+        "name": "transmission",
+        "cronTime": "*/7 * * * * *"
+    }, {
+        "name": "readForCorrect",
+        "cronTime": "*/3 * * * * *"
+    }],
+    "processor": [{
+        "name": "linkingJob",
+        "batchCount": 50,
+        "frequency": 300000,
+        "failedRetries": 3
+    }, {
+        "name": "transmissionJob",
+        "batchCount": 50,
+        "frequency": 300000,
+        "failedRetries": 3
+    }, {
+        "name": "readForCorrectJob",
+        "batchCount": 50,
+        "frequency": 300000,
+        "failedRetries": 3
+    }]
+}

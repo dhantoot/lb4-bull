@@ -9,14 +9,16 @@ import ProcessReturnedDocProvider from './services/process-returned-doc.service'
 export default class Scheduler extends CronJob {
   constructor(
     // @repository(ReportRepository) public reportRepository: ReportRepository,
+    name: string,
+    cronTime: string
   ) {
     super({
-      name: 'linking',
+      name,
       onTick: async () => {
         // do the work
         await this.performMyJob();
       },
-      cronTime: '*/10 * * * * *', // Every ten second
+      cronTime,
       start: true,
     });
   }
@@ -27,8 +29,8 @@ export default class Scheduler extends CronJob {
   // @logInvocation()
   async performMyJob() {
     // const count = await this.reportRepository.count()
-    this.logger.log('info', `Fetching data from repositories`);
-    // console.log('info', `Fetching data from repositories`);
+    // this.logger.log('info', `Fetching data from repositories`);
+    console.log('info', `Scheduler: Fetching data from repositories ${this.name}`);
     let data = [
       {
         id: 1,

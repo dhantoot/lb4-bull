@@ -10,8 +10,9 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import MyCronJob from './scheduler';
 import {MySequence} from './sequence';
+import Scheduler from './scheduler';
+import config from './config.json'
 
 export {ApplicationConfig};
 
@@ -45,17 +46,26 @@ export class HofsteeApplication extends BootMixin(
     };
 
     this.component(CronComponent);
-    this.add(createBindingFromClass(MyCronJob));
+    // this.add(createBindingFromClass(Scheduler));
     this.component(LoggingComponent);
-    this.configure(LoggingBindings.COMPONENT).to({
-      enableFluent: true, // default to true
-      enableHttpAccessLog: true, // default to true
-    });
-    this.configure(LoggingBindings.WINSTON_LOGGER).to({
-      host: process.env.FLUENTD_SERVICE_HOST ?? 'localhost',
-      port: +(process.env.FLUENTD_SERVICE_PORT_TCP ?? 3000),
-      timeout: 3.0,
-      reconnectInterval: 600000, // 10 minutes
-    });
+    
+    for (let item of config.schedule) {
+      const {
+        name,
+        cronTime
+      } = item
+      const schedClass: any = new Scheduler(name, cronTime)
+      this.add(createBindingFromClass(schedClass));
+    }
+    // this.configure(LoggingBindings.COMPONENT).to({
+    //   enableFluent: true, // default to true
+    //   enableHttpAccessLog: true, // default to true
+    // });
+    // this.configure(LoggingBindings.WINSTON_LOGGER).to({
+    //   host: process.env.FLUENTD_SERVICE_HOST ?? 'localhost',
+    //   port: +(process.env.FLUENTD_SERVICE_PORT_TCP ?? 3000),
+    //   timeout: 3.0,
+    //   reconnectInterval: 600000, // 10 minutes
+    // });
   }
 }

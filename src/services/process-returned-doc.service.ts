@@ -55,6 +55,7 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
       //   failedReason,
       //   msg: `Done in ${sec} seconds`
       // });
+
       // console.log('returnedDocProcessor: processing this data', {
       //   opts,
       //   attemptsMade,
@@ -103,6 +104,7 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
     // this.logger.log('info', `initializing bull instance..`, this.data)
     // console.log('info', `initializing bull instance..`, this.data)
     try {
+      console.log('info', `processor: initializing bull instance..`, this.data)
       this.queue = new Bull("returnedDocProcessor", {
         redis: {port: 6379, host: '127.0.0.1'}
       });
