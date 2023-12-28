@@ -1,38 +1,32 @@
-import {injectable, /* inject, */ BindingScope, Provider, service} from '@loopback/core';
-import Bull, { Queue, Job } from "bull";
-import { AnyARecord } from 'dns';
-import { resolve } from 'path';
-import Redis from 'ioredis';
-const redis = new Redis(6379, "192.168.1.1")
+import { /* inject, */ BindingScope, Provider, injectable} from '@loopback/core';
+// import {LoggingBindings, WinstonLogger} from '@loopback/logging';
+import Bull, {Job, Queue} from "bull";
+
 
 @injectable({scope: BindingScope.SINGLETON})
 export default class ProcessReturnedDocProvider implements Provider<Queue> {
   public queue: Queue;
   public job: Job;
+  public data: any;
+  // Inject a winston logger
+  // @inject(LoggingBindings.WINSTON_LOGGER)
+  // private logger: WinstonLogger;
 
-  constructor(/* Add @inject to inject parameters */) {}
-  
+  constructor(data: any) {
+    // this.logger.log('info', `this.initialize has been called`);
+    // console.log('info', `this.initialize has been called`)
+    this.data = data
+    this.initialize()
+  }
+
   async value() {
-    console.log('Bull-Service:returnedDocProcessor injected')
-    
+    // this.logger.log('info', `Bull-Service:returnedDocProcessor injected`);
+    // console.log('info', `Bull-Service:returnedDocProcessor injected`)
     return this.queue;
   }
 
-  xxx(data: any) {
-    console.log('hay nakooo', data.id)
-    // try {
-    //   return Promise.resolve(true)
-    // } catch (e) {
-    //   console.log('xxx:e', e)
-    //   throw new Error(e)
-    // }
-    const ms = Math.floor(Math.random() * (10000 - 1000 + 100) + 100)
-    const sec = ms/1000
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
   async returnedDocProcessor(job: Job) {
-    try { 
+    try {
       this.job = job
       const {
         opts,
@@ -45,22 +39,34 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
         processedOn,
         failedReason
       } = job
-      
-      const ms = Math.floor(Math.random() * (60000 - 1000 + 100) + 100)
-      const sec = ms/1000
 
-      console.log('returnedDocProcessor: processing this data', {
-        opts,
-        attemptsMade,
-        data,
-        timestamp,
-        stacktrace,
-        returnvalue,
-        id,
-        processedOn,
-        failedReason,
-        msg: `Done in ${sec} seconds`
-      })
+      const ms = Math.floor(Math.random() * (60000 - 1000 + 100) + 100)
+      const sec = ms / 1000
+
+      // this.logger.log('info', `returnedDocProcessor: processing this data`, {
+      //   opts,
+      //   attemptsMade,
+      //   data,
+      //   timestamp,
+      //   stacktrace,
+      //   returnvalue,
+      //   id,
+      //   processedOn,
+      //   failedReason,
+      //   msg: `Done in ${sec} seconds`
+      // });
+      // console.log('returnedDocProcessor: processing this data', {
+      //   opts,
+      //   attemptsMade,
+      //   data,
+      //   timestamp,
+      //   stacktrace,
+      //   returnvalue,
+      //   id,
+      //   processedOn,
+      //   failedReason,
+      //   msg: `Done in ${sec} seconds`
+      // })
 
       return new Promise(resolve => setTimeout(resolve, ms))
     } catch (e) {
@@ -70,68 +76,16 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
   }
 
   async start() {
-    console.log('start fn called')
+    // this.logger.log('info', `start fn called`)
+    // console.log('info', `start fn called`)
     try {
       this.queue.process(this.returnedDocProcessor);
 
-      // get All data from DB(repositories) for the whole day and load them here
-      let data = [
-        {
-          id: 1,
-          filename: 'returned_doc1.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 2,
-          filename: 'returned_doc2.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 3,
-          filename: 'returned_doc3.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 4,
-          filename: 'returned_doc4.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 5,
-          filename: 'returned_doc5.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 6,
-          filename: 'returned_doc6.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 7,
-          filename: 'returned_doc7.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 8,
-          filename: 'returned_doc8.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 9,
-          filename: 'returned_doc9.pdf',
-          bitrate: 2,
-        },
-        {
-          id: 10,
-          filename: 'returned_doc10.pdf',
-          bitrate: 2,
-        }
-      ]
-      // Algo for batch processing should be done here
-      for (let item of data) {
+      for (let item of this.data) {
         this.queue.add(
           item,
-          { removeOnComplete: true,
+          {
+            removeOnComplete: true,
             removeOnFail: false,
             lifo: true,
             attempts: 3,
@@ -139,25 +93,24 @@ export default class ProcessReturnedDocProvider implements Provider<Queue> {
           }
         );
       }
-    } catch(e) {
-      console.log('e', e)
+    } catch (e) {
+      // this.logger.error(e)
       throw new Error(e)
     }
   }
 
   async initialize() {
-    console.log('initialize: initializing bull instance..')
+    // this.logger.log('info', `initializing bull instance..`, this.data)
+    // console.log('info', `initializing bull instance..`, this.data)
     try {
-      //check redis if online, preset to false
-      if(false) {
-        throw new Error('Redis offline..')
-      } else {
-        this.queue = new Bull("returnedDocProcessor");
-        console.log('initialize: this.queue', this.queue.name)
-        this.start()
-      }
+      this.queue = new Bull("returnedDocProcessor", {
+        redis: {port: 6379, host: '127.0.0.1'}
+      });
+      // this.logger.log('info', `initialize: this.queue`, this.queue.name)
+      // console.log('info', `initializing bull instance..`, this.data)
+      this.start()
     } catch (e) {
-      console.log('initialize: e', e)
+      // this.logger.error(e)
       throw new Error(e)
     }
   }
