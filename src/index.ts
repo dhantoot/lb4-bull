@@ -5,7 +5,6 @@ export async function main(options: ApplicationConfig = {}) {
   const app = new HofsteeApplication(options);
   await app.boot();
   await app.start();
-  await app.startJobProcess()
 
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
