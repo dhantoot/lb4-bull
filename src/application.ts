@@ -1,16 +1,17 @@
 import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig} from '@loopback/core';
+import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
+import {CronComponent} from '@loopback/cron';
+import {LoggingBindings, LoggingComponent} from '@loopback/logging';
+import {RepositoryMixin} from '@loopback/repository';
+import {RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
   RestExplorerComponent,
 } from '@loopback/rest-explorer';
-import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import MyCronJob from './scheduler';
 import {MySequence} from './sequence';
-import ProcessReturnedDocProvider from './services/process-returned-doc.service';
-import ProcessLinkingDocProvider from './services/process-linking-doc.service'
 
 export {ApplicationConfig};
 
@@ -42,10 +43,19 @@ export class HofsteeApplication extends BootMixin(
         nested: true,
       },
     };
-  }
 
-  startJobProcess () {
-    new ProcessReturnedDocProvider().initialize()
-    // new ProcessLinkingDocProvider().initialize()
+    this.component(CronComponent);
+    this.add(createBindingFromClass(MyCronJob));
+    this.component(LoggingComponent);
+    this.configure(LoggingBindings.COMPONENT).to({
+      enableFluent: true, // default to true
+      enableHttpAccessLog: true, // default to true
+    });
+    this.configure(LoggingBindings.WINSTON_LOGGER).to({
+      host: process.env.FLUENTD_SERVICE_HOST ?? 'localhost',
+      port: +(process.env.FLUENTD_SERVICE_PORT_TCP ?? 3000),
+      timeout: 3.0,
+      reconnectInterval: 600000, // 10 minutes
+    });
   }
 }
