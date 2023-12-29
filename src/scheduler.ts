@@ -1,88 +1,135 @@
 
 import {CronJob, cronJob} from '@loopback/cron';
-// import {ReportRepository} from '../repositories';
-import {inject} from '@loopback/core';
-import {LoggingBindings, WinstonLogger} from '@loopback/logging';
-import ProcessReturnedDocProvider from './services/process-returned-doc.service';
+// import {CustomerInfoRepository} from '../repositories';
+import ProcessAgingDocProvider from './services/process-aging-doc.service';
+import ProcessForCorrectDocProvider from './services/process-forCorrect-doc.service';
+import ProcessLinkingDocProvider from './services/process-linking-doc.service';
+import ProcessTransmissionDocProvider from './services/process-transmission-doc.service';
+import ProcessUpdateDocProvider from './services/process-update-doc-service';
 
 @cronJob()
 export default class Scheduler extends CronJob {
   constructor(
-    // @repository(ReportRepository) public reportRepository: ReportRepository,
+    // @repository(CustomerInfoRepository) public customerInfoRepository: CustomerInfoRepository,
     name: string,
     cronTime: string
   ) {
     super({
       name,
       onTick: async () => {
-        // do the work
-        await this.performMyJob();
+        await this.sendToProcessor();
       },
       cronTime,
       start: true,
     });
+    name = this.name
   }
 
-  // Inject a winston logger
-  @inject(LoggingBindings.WINSTON_LOGGER)
-  private logger: WinstonLogger;
-  // @logInvocation()
-  async performMyJob() {
-    // const count = await this.reportRepository.count()
+  async fetchRecordsToLink() {
+    // Fetch records from database
+    // const response = await this.customerInfoRepository.count()
     // this.logger.log('info', `Fetching data from repositories`);
-    console.log('info', `Scheduler: Fetching data from repositories ${this.name}`);
-    let data = [
-      {
-        id: 1,
-        filename: 'returned_doc1.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 2,
-        filename: 'returned_doc2.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 3,
-        filename: 'returned_doc3.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 4,
-        filename: 'returned_doc4.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 5,
-        filename: 'returned_doc5.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 6,
-        filename: 'returned_doc6.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 7,
-        filename: 'returned_doc7.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 8,
-        filename: 'returned_doc8.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 9,
-        filename: 'returned_doc9.pdf',
-        bitrate: 2,
-      },
-      {
-        id: 10,
-        filename: 'returned_doc10.pdf',
-        bitrate: 2,
+    const randRecordLen = Math.floor(Math.random() * (2000 - 700 + 100) + 100)
+    const rand = Math.floor(Math.random() * (300 - 100 + 10) + 10)
+    let response = []
+    for (let i = 0; i < randRecordLen; i++) {
+      response.push({
+        id: i,
+        filename: `${this.name}-document-${i}`,
+        bitrate: rand
+      })
+    }
+    return response
+  }
+
+  async fetchForCorrect() {
+    // Fetch records from database
+    const randRecordLen = Math.floor(Math.random() * (2000 - 700 + 100) + 100)
+    const rand = Math.floor(Math.random() * (300 - 100 + 10) + 10)
+    let response = []
+    for (let i = 0; i < randRecordLen; i++) {
+      response.push({
+        id: i,
+        filename: `${this.name}-document-${i}`,
+        bitrate: rand
+      })
+    }
+    return response
+  }
+
+  async fetchRecordsToTransmit() {
+    const randRecordLen = Math.floor(Math.random() * (2000 - 700 + 100) + 100)
+    const rand = Math.floor(Math.random() * (300 - 100 + 10) + 10)
+    let response = []
+    for (let i = 0; i < randRecordLen; i++) {
+      response.push({
+        id: i,
+        filename: `${this.name}-document-${i}`,
+        bitrate: rand
+      })
+    }
+    return response
+  }
+
+  async fetchForUpdate() {
+    // Fetch records from database
+    const randRecordLen = Math.floor(Math.random() * (2000 - 700 + 100) + 100)
+    const rand = Math.floor(Math.random() * (300 - 100 + 10) + 10)
+    let response = []
+    for (let i = 0; i < randRecordLen; i++) {
+      response.push({
+        id: i,
+        filename: `${this.name}-document-${i}`,
+        bitrate: rand
+      })
+    }
+    return response
+  }
+
+  async fetchAging() {
+    // Fetch records from database
+    const randRecordLen = Math.floor(Math.random() * (2000 - 700 + 100) + 100)
+    const rand = Math.floor(Math.random() * (300 - 100 + 10) + 10)
+    let response = []
+    for (let i = 0; i < randRecordLen; i++) {
+      response.push({
+        id: i,
+        filename: `${this.name}-document-${i}`,
+        bitrate: rand
+      })
+    }
+    return response
+  }
+
+  async sendToProcessor() {
+    console.log(this.name, `Scheduler: Fetching data from repositories`);
+    try {
+      switch (this.name) {
+        case 'linking':
+          let linkingResponse = await this.fetchRecordsToLink()
+          const linkingResponseInstance = new ProcessLinkingDocProvider(linkingResponse, this.name)
+          break;
+        case 'transmission':
+          let transmissionResponse = await this.fetchRecordsToTransmit()
+          const transmissionResponseInstance = new ProcessTransmissionDocProvider(transmissionResponse, this.name)
+          break;
+        case 'readForCorrect':
+          let forCorrectResponse = await this.fetchForCorrect()
+          const forCorrectResponseInstance = new ProcessForCorrectDocProvider(forCorrectResponse, this.name)
+          break;
+        case 'updateDoc':
+          let updateDocResponse = await this.fetchForUpdate()
+          const updateDocResponseInstance = new ProcessUpdateDocProvider(updateDocResponse, this.name)
+          break;
+        case 'aging':
+          let agingResponse = await this.fetchAging()
+          const agingResponseInstance = new ProcessAgingDocProvider(agingResponse, this.name)
+          break;
+        default:
+          break;
       }
-    ]
-    const xx = new ProcessReturnedDocProvider(data)
+    } catch (e) {
+      throw (e)
+    }
   }
 }
