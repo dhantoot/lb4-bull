@@ -1,5 +1,9 @@
-import {ApplicationConfig, HofsteeApplication} from './application';
+import { ApplicationConfig, HofsteeApplication } from './application';
+import { createBindingFromClass } from '@loopback/core';
 export * from './application';
+import Scheduler from './scheduler';
+import config from '../config';
+import {bold} from 'chalk';
 
 export async function main(options: ApplicationConfig = {}) {
   const app = new HofsteeApplication(options);
@@ -8,7 +12,19 @@ export async function main(options: ApplicationConfig = {}) {
 
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
-  // console.log(`Try ${url}/ping`);
+
+  console.log(config)
+  const { schedule } = config;
+  for (const name in schedule) {
+    console.log('name', name)
+    const { cronTime, isActive } = schedule[name]
+
+    if (isActive) {
+      console.log(bold.bgCyanBright('->', 'Activated job: ', name))
+      const schedClass: any = new Scheduler(name, cronTime, app)
+      app.add(createBindingFromClass(schedClass));
+    }
+  }
 
   return app;
 }
