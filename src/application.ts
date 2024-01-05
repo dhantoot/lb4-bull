@@ -1,5 +1,5 @@
 import {BootMixin} from '@loopback/boot';
-import {ApplicationConfig, createBindingFromClass} from '@loopback/core';
+import {ApplicationConfig, createBindingFromClass, Application} from '@loopback/core';
 import {CronComponent} from '@loopback/cron';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
@@ -9,9 +9,7 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
-import Scheduler from './scheduler';
 import {MySequence} from './sequence';
-
 export {ApplicationConfig};
 
 export class HofsteeApplication extends BootMixin(
@@ -42,21 +40,6 @@ export class HofsteeApplication extends BootMixin(
         nested: true,
       },
     };
-
     this.component(CronComponent);
-
-    // For Testing Single Process
-    const schedClass: any = new Scheduler('transmission', '*/20 * * * * *')
-    this.add(createBindingFromClass(schedClass));
-
-    // Default: Loop all available processes
-    // for (let item of config.schedule) {
-    //   const {
-    //     name,
-    //     cronTime
-    //   } = item
-    //   const schedClass: any = new Scheduler(name, cronTime)
-    //   this.add(createBindingFromClass(schedClass));
-    // }
   }
 }
